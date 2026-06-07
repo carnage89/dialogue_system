@@ -20,6 +20,7 @@ from dialog_system.api import app  # noqa: E402
 if __name__ == "__main__":
     import uvicorn  # noqa: E402
 
-    print("[INFO] Starting server on http://0.0.0.0:8000")
-    print("[INFO] Open browser: http://localhost:8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
+    port = int(os.getenv("PORT", 8000))
+    print(f"[INFO] Starting server on http://0.0.0.0:{port}")
+    print(f"[INFO] Open browser: http://localhost:{port}")
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=False)
