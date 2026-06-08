@@ -32,7 +32,7 @@ use_llm = bool(os.getenv("OPENROUTER_API_KEY")) and bool(os.getenv("NLG_MODEL"))
 dm = DialogManager(characters_data=characters_data, use_llm=use_llm)
 
 # Toxicity filter settings
-TOXICITY_FILTER = os.getenv("TOXICITY_FILTER", "soft").lower()  # off|soft|strict
+TOXICITY_FILTER = os.getenv("TOXICITY_FILTER", "strict").lower()  # off|soft|strict
 TOXICITY_BLOCKLIST = os.getenv(
     "TOXICITY_BLOCKLIST",
     "нахуй,сука,сук,пидор,убью,зарежу,убить,нож,ебать,блять,пизд,нахер,нассу,сдохни"
