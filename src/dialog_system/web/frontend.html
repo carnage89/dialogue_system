@@ -452,7 +452,7 @@
 
         async function toggleToxicity() {
             const toggle = document.getElementById("toxicityToggle");
-            const value = toggle.checked ? "soft" : "off";
+            const value = toggle.checked ? "strict" : "off";
             updateToxicityLabel(toggle.checked);
             try {
                 const response = await fetch(`${API_BASE}/settings`, {
