@@ -42,7 +42,12 @@ TOXICITY_REGEX = re.compile(r"\b(" + "|".join(map(re.escape, TOXICITY_WORDS)) + 
 
 
 def _is_toxic(text: str) -> bool:
-    return bool(text and TOXICITY_REGEX.search(text))
+    if not text:
+        return False
+    result = bool(TOXICITY_REGEX.search(text))
+    if result:
+        print(f"[TOXIC] Found toxic content in: '{text}'")
+    return result
 
 
 class SettingsUpdateRequest(BaseModel):
@@ -112,7 +117,9 @@ async def update_settings(req: SettingsUpdateRequest):
     value = req.toxicity_filter.lower().strip()
     if value not in {"off", "soft", "strict"}:
         raise HTTPException(status_code=400, detail="Invalid toxicity_filter")
+    print(f"[DEBUG] Changing TOXICITY_FILTER from {TOXICITY_FILTER} to {value}")
     TOXICITY_FILTER = value
+    print(f"[DEBUG] TOXICITY_FILTER is now {TOXICITY_FILTER}")
     return {"toxicity_filter": TOXICITY_FILTER}
 
 
@@ -160,7 +167,12 @@ async def dialogue_respond(req: PlayerActionRequest):
     if not state:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    if TOXICITY_FILTER == "strict" and _is_toxic(req.action):
+    # Debug logging
+    is_toxic_input = _is_toxic(req.action)
+    print(f"[DEBUG] TOXICITY_FILTER={TOXICITY_FILTER}, input='{req.action}', is_toxic={is_toxic_input}")
+    
+    if TOXICITY_FILTER == "strict" and is_toxic_input:
+        print(f"[DEBUG] Blocking toxic input: {req.action}")
         raise HTTPException(status_code=400, detail="Токсичный ввод заблокирован")
 
     response = dm.decide_response(
@@ -172,7 +184,11 @@ async def dialogue_respond(req: PlayerActionRequest):
     if "error" in response:
         raise HTTPException(status_code=400, detail=response["error"])
 
-    if TOXICITY_FILTER == "strict" and _is_toxic(response.get("text", "")):
+    is_toxic_output = _is_toxic(response.get("text", ""))
+    print(f"[DEBUG] Response is_toxic={is_toxic_output}, text='{response.get('text', '')}'")
+    
+    if TOXICITY_FILTER == "strict" and is_toxic_output:
+        print(f"[DEBUG] Blocking toxic response")
         response["text"] = "Давай без оскорблений. Продолжим спокойно."
         response["intent"] = "moderation"
         response["tone"] = "neutral"
